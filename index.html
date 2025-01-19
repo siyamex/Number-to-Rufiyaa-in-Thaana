@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Number to Thaana Converter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f9f9f9;
+      color: #333;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 24px;
+      color: #444;
+    }
+    input[type="text"] {
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px 0;
+      width: 200px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      color: #fff;
+      background-color: #007bff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 20px;
+      color: #007bff;
+    }
+  </style>
+ 
+</head>
+<body>
+  <h1>Number to Thaana Converter</h1>
+  <input type="text" id="numberInput" placeholder="Enter a number (e.g., 1.50)" />
+  <button onclick="convertToThaana()">Convert</button>
+  <div id="result"></div>
+
+  
+
+  <script>
+const ehbari = [
+  "", "އެއް", "ދެ", "ތިން", "ހަތަރު", "ފަސް", "ހަ", "ހަތް", "އަށް", "ނުވަ",
+  "ދިހަ", "އެގާރަ", "ބާރަ", "ތޭރަ", "ސާދަ", "ފަނަރަ", "ސޯޅަ", "ސަތާރަ", "އަށާރަ", "ނަވާރަ",
+  "ވިހި", "އެކާވީސް", "ބާވީސް", "ތޭވީސް", "ސައުވީސް", "ފަންސަވީސް", "ސައްބީސް", "ހަތާވީސް", "އަށާވީސް", "ނަވާވީސް"
+];
+
+const dhihabari = [
+  "ސުން", "ދިހަ", "ވިހި", "ތިރީސް", "ސާޅީސް", "ފަންސާސް", "ފަސްދޮޅަސް", "ހައްދިހަ", "އައްޑިހަ", "ނުވަދިހަ"
+];
+
+const sunbari = ["", "ހާސް", "މިލިޔަން", "ބިލިޔަން", "ޓްރިލިޔަން"];
+
+function thousandSub(number) {
+  if (number <= 0 || number <= 29) {
+    return ehbari[number];
+  } else if (number <= 99) {
+    if (number % 10 === 0) {
+      return dhihabari[Math.floor(number / 10)];
+    } else {
+      return dhihabari[Math.floor(number / 10)] + " " + ehbari[number % 10];
+    }
+  } else if (number <= 999) {
+    let hundreds = Math.floor(number / 100);
+    let remainder = number % 100;
+    let hundredWord = "ސަތޭކަ ";
+
+    // Handle the special case for 200 (use "ދުވި")
+    if (hundreds === 2) {
+      hundredWord = "ސައްތަ "; // special case for 200
+      return "ދުވި" + hundredWord + (remainder === 0 ? "" : thousandSub(remainder));
+    }
+
+    if (remainder === 0) {
+      return ehbari[hundreds] + hundredWord;
+    } else {
+      return ehbari[hundreds] + hundredWord + thousandSub(remainder);
+    }
+  }
+
+  return "";
+}
+
+function thousandUp(number) {
+  const chunks = [];
+  while (number > 0) {
+    chunks.push(number % 1000);
+    number = Math.floor(number / 1000);
+  }
+
+  const result = chunks
+    .reverse()
+    .map((chunk, index) => thousandSub(chunk) + " " + sunbari[chunks.length - 1 - index])
+    .join(" ");
+
+  return result.trim();
+}
+
+function convertToThaana() {
+  const numberInput = document.getElementById("numberInput").value.trim();
+  if (!numberInput || isNaN(parseFloat(numberInput))) {
+    document.getElementById("result").innerText = "Please enter a valid number!";
+    return;
+  }
+
+  const [integerPart, decimalPart] = numberInput.split(".");
+  const number = parseInt(integerPart, 10);
+  const laari = decimalPart ? parseInt(decimalPart.padEnd(2, "0"), 10) : 0;
+
+  // Convert the integer part to Thaana and append "ރުފިޔާ"
+  let result = (number < 1000 ? thousandSub(number) : thousandUp(number)) + " ރުފިޔާ";
+
+  // If there is a decimal part, append the laari conversion
+  if (laari > 0) {
+    result += " " + thousandSub(laari) + " ލާރި";
+  }
+
+  document.getElementById("result").innerText = result;
+}
+
+
+  </script>
+
+
+</body>
+</html>
